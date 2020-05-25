@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>公告列表</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link href="/static/css/interface.css" rel="stylesheet">
+  <style media="screen">
+    #Main {
+      margin-top: 2%;
+      margin-bottom: 2%;
+    }
+
+    .hide_area {
+      display: none;
+      height: 0px;
+    }
+
+    body {
+      overflow: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main container" style="background:url('/static/image/mail_panel.png');background-size: 1136px 640px;">
+    <div class="mail_list" id="mail_list">
+      <div class="mail_list_item" id="mail_list_item1">新邮件</div>
+    </div>
+    <div class="mail_panel">
+      <div class="mail_title" id="title">这是一封邮件</div>
+      <div class="mail_content" id="content">
+        这是邮件的详细内容
+      </div>
+      <div class="mail_signature" id="sign">
+        时空异闻录运营组
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  var MailData = [];
+  let renderData = (data) => {
+    let ListHtml = "";
+    console.log(data);
+    for (let i = data.length - 1; i > 0; i--) {
+      data[i]["itemHtml"] = '<div class="mail_list_item" id="mail_list_item' + i + '">' + data[i]["mail"]["short_title"] + '</div>';
+      ListHtml += data[i]["itemHtml"];
+    }
+
+    $("#mail_list").html(ListHtml);
+    $("#content").html(data[data.length - 1]["mail"]["content"]);
+    $("#title").html(data[data.length - 1]["mail"]["long_title"]);
+    $("#sign").html(data[data.length - 1]["mail"]["from"]);
+    for (let i = 0; i < data.length; i++) {
+      ((data, i) => {
+        $("#mail_list_item" + i).click((event) => {
+          console.log("check to", i);
+          console.log(data[i]["mail"]["content"]);
+          console.log(data[i]["mail"]["long_title"]);
+          console.log(data[i]["mail"]["from"]);
+          if (data[i]["mail"]["content"]) {
+            $("#content").html(data[i]["mail"]["content"]);
+          } else {
+            $("#content").html("此邮件没有任何内容");
+          }
+          $("#title").html(data[i]["mail"]["long_title"]);
+          $("#sign").html(data[i]["mail"]["from"]);
+        });
+      })(data, i);
+
+    }
+  }
+  let getData = function() {
+    $.ajax({
+        url: '/mail/selectMail',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          username: "admin_rt",
+          password: "admin123",
+        },
+        success: function(data) {
+          if (data["errno"] == 0) {
+            // console.log(data["data"]);
+            renderData(data["data"].filter((item) => {
+              item.mail = JSON.parse(item.mail);
+              return item.userid == 0;
+            }));
+          } else {
+            alert("获取失败!" + data["errmsg"]);
+          }
+        }
+      })
+      .fail(function() {
+        alert("失败!")
+      });
+  }
+  $(document).ready(function() {
+    getData();
+  });
+</script>
+
+</html>

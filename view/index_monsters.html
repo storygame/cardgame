@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style media="screen" type="text/css">
+    #Main {
+      margin: 2%;
+    }
+
+    #siderbar {
+      height: 600px;
+      overflow-y: auto;
+      min-height: 800px;
+      width: 250px;
+      font-size: 1.2em;
+    }
+
+    #show {
+      position: absolute;
+      right: 5%;
+      top: 5%;
+      height: 100%;
+      min-height: 800px;
+      width: 75%;
+      border: 1px solid #ccc;
+      font-size: 1.2em;
+    }
+
+    #monster_background {
+      width: 500px;
+      height: 715px;
+    }
+
+    #name {
+      position: absolute;
+      top: 375px;
+      left: 240px;
+      width: 100px;
+      font-size: 1.3em;
+      color: #333;
+    }
+
+    #star {
+      position: absolute;
+      top: 85px;
+      left: 90px;
+      width: 50px;
+      font-size: 2.1em;
+      color: #000;
+    }
+
+    #description {
+      position: absolute;
+      top: 450px;
+      left: 130px;
+      width: 300px;
+      font-size: 1.1em;
+      color: #333;
+    }
+
+    #rare {
+      position: absolute;
+      top: 118px;
+      left: 249px;
+      width: 34px;
+      height: 34px;
+      border-radius: 3em;
+      background-color: #ece883;
+    }
+
+    #story {
+      before: "story";
+      position: absolute;
+      padding: 2%;
+      left: 15px;
+      width: 230px;
+      height: auto;
+      min-height: 200px;
+      border: 1px solid #fff;
+      border-radius: 0.3em;
+      box-shadow: 1px 1px 2px 3px #c324a7;
+    }
+
+    #text-info {
+      position: absolute;
+      right: 15px;
+      width: 270px;
+      height: auto;
+      min-height: 300px;
+      border: 1px solid #ccc;
+      border-radius: 0.3em;
+      box-shadow: 1px 1px 2px 3px;
+    }
+
+    #monster_img {
+      position: absolute;
+      top: 152px;
+      left: 144px;
+      width: 240px;
+      height: 200px;
+      border-radius: 0.2em;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="Main" class="container">
+    <div class="row" id="siderbar">
+      <div style="padding:2%;width:100%;">
+        <ul class="list-group" id="monster_list">
+        </ul>
+      </div>
+    </div>
+
+    <div class="row" id="show">
+
+      <pre id="text-info">
+      </pre>
+      <div id="story">
+        在你受到萌化值增加之前
+      </div>
+      <div class="col-md-8">
+        <div class="col-md-4 col-md-offset-4">
+          <label id="name">测试</label>
+          <label id="star">10</label>
+          <div id="description"></div>
+          <div id="rare"> </div>
+          <canvas width="240px" height="200px" id="monster_img"></canvas>
+
+          <img id="monster_background" />
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  var monsterList;
+  let MonsterColor = {
+    "N": "#ddd",
+    "R": "#26d123",
+    "SR": "#7239de",
+    "UR": "#e38625",
+    "SSR": "#eb385e"
+  };
+  let monsterRender = function(monster) {
+    let canvas = document.getElementById("monster_img");
+    let ctx = canvas.getContext("2d");
+    //清空画布
+    ctx.fillStyle = "#FEF5E6";
+    ctx.beginPath();
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.closePath();
+    ctx.font = 'bold 35px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillStyle = '#ccc';
+    ctx.strokeText("Loading...", 120, 110);
+    $("#name").text(monster["name"]);
+    if (monster["name"].length >= 5) {
+      $("#name").css("font-size", "1.1em");
+    } else {
+      $("#name").css("font-size", "1.3em");
+    }
+    let name_left = 240;
+    let new_left = String(name_left - (monster["name"].length - 2) * 5) + "px";
+    $("#name").css("left", new_left);
+
+
+    let monster_effect = JSON.parse(monster["skill"]);
+    let des = monster["skill_description"];
+    des = JSON.parse(des);
+    let des_text = "";
+    for (let d in des) {
+      des_text += des[d] + "<br/>";
+    }
+    des = des_text;
+    if (monster_effect["condition"] != undefined && monster_effect["condition"]["secret"] == true) {
+      des += "(奥秘)";
+    }
+    $("#description").html(des);
+    $("#star").text(monster_effect["monster_cost"]);
+    $("#rare").css("background-color", MonsterColor[monster_effect["monster_rare"]]);
+    $("#text-info").text(JSON.stringify(monster_effect, null, "  "));
+    $("#story").text(monster["skill_description"]);
+    if (monster["img"] == "") {
+      monster["img"] = "https://i.loli.net/2018/12/20/5c1b4018d5c27.png";
+    }
+  }
+  let renderData = function(monsterList) {
+    let htmlString = ""
+    for (let i in monsterList) {
+      if (i == 0)
+        htmlString += "<li class=\"list-group-item active\" id='monster_" + i + "'>" + monsterList[i]["name"] + "</li>";
+      else
+        htmlString += "<li class=\"list-group-item\" id='monster_" + i + "'>" + monsterList[i]["name"] + "</li>";
+    }
+    $("#monster_list").empty();
+    $("#monster_list").append(htmlString);
+    monsterRender(monsterList[0]);
+    for (let i in monsterList) {
+      let cid = "#monster_" + String(i);
+      (function(cid, i) {
+        $(cid).click(function(event) {
+          let name = monsterList[i]["name"];
+          let des = monsterList[i]["skill_description"];
+          $('li').each(function(i, e) {
+            $(e).removeClass('active');
+          })
+          $(this).addClass("active");
+          monsterRender(monsterList[i]);
+        });
+      })(cid, i);
+    }
+  }
+  let getMonsterList = function() {
+    $.ajax({
+        url: '/monster/selectMonsters',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          username: "admin",
+          password: "admin"
+        },
+        success: function(data) {
+          console.log(data);
+          if (data["errno"] == 0) {
+            monsterList = data["data"];
+            console.log(monsterList)
+            monsterList = monsterList.reverse();
+            renderData(monsterList);
+          } else {
+            alert(data["errmsg"]);
+          }
+        }
+      })
+      .fail(function() {
+        alert("获取卡牌数据失败!");
+      });
+  }
+
+  $(document).ready(function() {
+    getMonsterList()
+  });
+</script>
+
+</html>

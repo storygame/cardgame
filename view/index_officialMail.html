@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style media="screen">
+    #Main{
+      margin-top:2%;
+      margin-bottom:2%;
+    }
+    .hide_area{
+      display:none;
+      height:0px;
+    }
+    body{
+      overflow:auto;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="Main" class="container">
+    <div class="row" style="border-bottom:3px solid rgb(54, 205, 178);margin-bottom:10px;">
+      <h1>添加公告</h1>
+    </div>
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <form>
+          <div class="form-group">
+            <label for="code">管理员口令</label>
+            <input type="text" class="form-control" id="code" placeholder="如果没有请找@RT要">
+          </div>
+          <div class="form-group">
+            <label for="short_title">列表（短）标题</label>
+            <input type="text" class="form-control" id="short_title" placeholder="新邮件!">
+          </div>
+          <div class="form-group">
+            <label for="long_title">邮件（长）标题</label>
+            <input type="text" class="form-control" id="long_title" placeholder="7月14日更新公告明细">
+          </div>
+          <div class="form-group">
+            <label for="content">邮件内容</label>
+            <textarea class="form-control" name="content" id="content" rows="8" cols="80" placeholder="更新内容有..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="type">邮件署名</label>
+            <input type="text" class="form-control" id="from" disabled value="时空异闻录运营组">
+          </div>
+          <div class="col-md-4 col-md-offset-5">
+            <button type="button" id="add_mail" class="btn btn-lg btn-success">添加公告</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- <div style="width:100%;height:5px;background:#000;opacity:0.8;margin:20px 0px;"></div> -->
+
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    $("#add_mail").click(function(event) {
+      /* Act on the event */
+      let short_title = $("#short_title").val();
+      if (!short_title) {
+        alert("请填写邮件title");
+        return;
+      }
+      let content = $("#content").val();
+      if (!content) {
+        alert("请填写邮件内容");
+        return;
+      }
+
+      let long_title = $("#long_title").val();
+      if (!long_title) {
+        alert("请填写邮件长标题");
+        return;
+      }
+      let code = $("#code").val();
+      $.ajax({
+          url: '/mail/addAnnouncement',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            username: "admin_rt",
+            password: "admin123",
+            code: code,
+            short_title: short_title,
+            content: content,
+            long_title: long_title
+          },
+          success: function(data) {
+            if (data["errno"] == 0)
+              alert("添加成功");
+            else {
+              alert(data["errmsg"]);
+            }
+          }
+        })
+        .fail(function() {
+          alert("失败!")
+        });
+
+    });
+  });
+</script>
+
+</html>

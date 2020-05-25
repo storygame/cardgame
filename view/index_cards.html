@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style media="screen" type="text/css">
+    #Main {
+      margin: 2%;
+    }
+
+    #siderbar {
+      height: 600px;
+      overflow-y: auto;
+      min-height: 800px;
+      width: 250px;
+      font-size: 1.2em;
+    }
+
+    #show {
+      position: absolute;
+      right: 5%;
+      top: 10%;
+      height: 100%;
+      min-height: 800px;
+      width: 75%;
+      border: 1px solid #ccc;
+      font-size: 1.2em;
+    }
+
+    #card_background {
+      width: 500px;
+      height: 715px;
+    }
+
+    #name {
+      position: absolute;
+      top: 375px;
+      left: 240px;
+      width: 100px;
+      font-size: 1.3em;
+      color: #333;
+    }
+
+    #star {
+      position: absolute;
+      top: 85px;
+      left: 90px;
+      width: 50px;
+      font-size: 2.1em;
+      color: #000;
+    }
+
+    #description {
+      position: absolute;
+      top: 450px;
+      left: 130px;
+      width: 250px;
+      font-size: 1.1em;
+      color: #333;
+    }
+
+    #rare {
+      position: absolute;
+      top: 118px;
+      left: 249px;
+      width: 34px;
+      height: 34px;
+      border-radius: 3em;
+      background-color: #ece883;
+    }
+
+    #story {
+      before: "story";
+      position: absolute;
+      top: 10%;
+      padding: 2%;
+      left: 15px;
+      width: 230px;
+      height: auto;
+      min-height: 200px;
+      border: 1px solid #fff;
+      border-radius: 0.3em;
+      box-shadow: 1px 1px 2px 3px #c324a7;
+    }
+
+    #text-info {
+      position: absolute;
+      top: 10%;
+      right: 15px;
+      width: 270px;
+      height: auto;
+      min-height: 300px;
+      border: 1px solid #ccc;
+      border-radius: 0.3em;
+      box-shadow: 1px 1px 2px 3px;
+    }
+
+    #card_img {
+      position: absolute;
+      top: 152px;
+      left: 144px;
+      width: 240px;
+      height: 200px;
+      border-radius: 0.2em;
+    }
+
+    #filter {
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="Main" class="container">
+    <div class="row" id="filter">
+      <button class="btn btn-default" type="button" id="all" onClick="filter('all')">All</button>
+      <button class="btn btn-default" id="ssr" onClick="filter('ssr')" type="button">天</button>
+      <button class="btn btn-default" id="sr" onClick="filter('sr')" type="button">地</button>
+      <button class="btn btn-default" id="r" onClick="filter('r')" type="button">玄</button>
+      <button class="btn btn-default" id="n" onClick="filter('n')" type="button">黄</button>
+      <button class="btn btn-default" id="close_fight" onClick="filter('close_fight')" type="button">近战</button>
+      <button class="btn btn-default" id="range_fight" onClick="filter('range_fight')" type="button">远战</button>
+      <button class="btn btn-default" id="armor" onClick="filter('armor')" type="button">防具</button>
+      <button class="btn btn-default" id="assist" onClick="filter('assist')" type="button">辅助</button>
+    </div>
+    <div class="row" id="siderbar">
+      <div style="padding:2%;width:100%;">
+        <ul class="list-group" id="card_list">
+        </ul>
+      </div>
+    </div>
+
+    <div class="row" id="show">
+
+      <pre id="text-info">
+      </pre>
+      <div id="story">
+        在你受到萌化值增加之前
+      </div>
+      <div class="col-md-8">
+        <div class="col-md-4 col-md-offset-4">
+          <label id="name">测试</label>
+          <label id="star">10</label>
+          <div id="description">在你受到萌化值增加之前,抵消本次萌化值增加.(奥秘)</div>
+          <div id="rare"> </div>
+          <canvas width="240px" height="200px" id="card_img"></canvas>
+
+          <!-- <img id="card_background" src="https://i.loli.net/2018/12/05/5c0780da236ed.jpg" /> -->
+        </div>
+
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://underscorejs.org/underscore-min.js"></script>
+<script type="text/javascript">
+  var cardList;
+  let CardColor = {
+    "N": "#ddd",
+    "R": "#26d123",
+    "SR": "#7239de",
+    "UR": "#e38625",
+    "SSR": "#eb385e"
+  };
+
+  function filter(s) {
+    if (s == "all") {
+      renderData(cardList);
+    }
+    if (s == "ssr") {
+      let filter_cardList = _.filter(cardList, function(item) {
+        let effect = JSON.parse(item["effect"]);
+        if (effect["card_rare"] == "SSR") {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      renderData(filter_cardList);
+    }
+    if (s == "sr") {
+      let filter_cardList = _.filter(cardList, function(item) {
+        let effect = JSON.parse(item["effect"]);
+        if (effect["card_rare"] == "SR") {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      renderData(filter_cardList);
+    }
+    if (s == "r") {
+      let filter_cardList = _.filter(cardList, function(item) {
+        let effect = JSON.parse(item["effect"]);
+        if (effect["card_rare"] == "R") {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      renderData(filter_cardList);
+    }
+    if (s == "n") {
+      let filter_cardList = _.filter(cardList, function(item) {
+        let effect = JSON.parse(item["effect"]);
+        if (effect["card_rare"] == "N") {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      renderData(filter_cardList);
+    }
+    if (s == "close_fight") {
+      let filter_cardList = _.filter(cardList, function(item) {
+        if (item["type"] == "近战") {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      renderData(filter_cardList);
+    }
+    if (s == "range_fight") {
+      let filter_cardList = _.filter(cardList, function(item) {
+        if (item["type"] == "远战") {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      renderData(filter_cardList);
+    }
+    if (s == "armor") {
+      let filter_cardList = _.filter(cardList, function(item) {
+        if (item["type"] == "防具") {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      renderData(filter_cardList);
+    }
+    if (s == "assist") {
+      let filter_cardList = _.filter(cardList, function(item) {
+        if (item["type"] == "辅助") {
+          return true;
+        } else {
+          return false;
+        }
+      });
+      renderData(filter_cardList);
+    }
+  }
+  let cardRender = function(card) {
+    if (!card) return;
+    let canvas = document.getElementById("card_img");
+    let ctx = canvas.getContext("2d");
+    //清空画布
+    ctx.fillStyle = "#FEF5E6";
+    ctx.beginPath();
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.closePath();
+    ctx.font = 'bold 35px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillStyle = '#ccc';
+    ctx.strokeText("Loading...", 120, 110);
+    $("#name").text(card["name"]);
+    if (card["name"].length >= 5) {
+      $("#name").css("font-size", "1.1em");
+    } else {
+      $("#name").css("font-size", "1.3em");
+    }
+    let name_left = 240;
+    let new_left = String(name_left - (card["name"].length - 2) * 5) + "px";
+    $("#name").css("left", new_left);
+
+
+    let card_effect = JSON.parse(card["effect"]);
+    let des = card["description"];
+    if (card_effect["condition"] != undefined && card_effect["condition"]["secret"] == true) {
+      des += "(奥秘)";
+    }
+    $("#description").text(des);
+    $("#star").text(card_effect["card_cost"]);
+    $("#rare").css("background-color", CardColor[card_effect["card_rare"]]);
+    $("#text-info").text(JSON.stringify(card_effect, null, "  "));
+    $("#story").text(card["story"]);
+    // if (card["img"] == "") {
+    //   card["img"] = "https://i.loli.net/2018/12/20/5c1b4018d5c27.png";
+    // }
+    // let image = new Image();
+    // image.src = card["img"];
+    // image.onload = () => {
+    //
+    //
+    //   let w = image.width
+    //   let h = image.height
+    //   let dw = canvas.width / w //canvas与图片的宽高比
+    //   let dh = canvas.height / h
+    //   let ratio;
+    //   //清空画布(loading的text)
+    //   ctx.fillStyle = "#FEF5E6";
+    //   ctx.beginPath();
+    //   ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //   ctx.closePath();
+    //   // 裁剪图片中间部分
+    //   if (w > canvas.height && h > canvas.width || w < canvas.height && h < canvas.width) {
+    //     if (dw > dh) {
+    //       ctx.drawImage(image, 0, (h - canvas.width / dw) / 2, w, canvas.width / dw, 0, 0, canvas.width, canvas.width)
+    //     } else {
+    //       ctx.drawImage(image, (w - canvas.width / dh) / 2, 0, canvas.width / dh, h, 0, 0, canvas.width, canvas.width)
+    //     }
+    //   }
+    //   // 拉伸图片
+    //   else {
+    //     if (w < canvas.width) {
+    //       ctx.drawImage(image, 0, (h - canvas.width / dw) / 2, w, canvas.width / dw, 0, 0, canvas.width, canvas.width)
+    //     } else {
+    //       ctx.drawImage(image, (w - canvas.width / dh) / 2, 0, canvas.width / dh, h, 0, 0, canvas.width, canvas.width)
+    //     }
+    //   }
+    // }
+
+  }
+  let renderData = function(cardList) {
+    let htmlString = ""
+    for (let i in cardList) {
+      if (i == 0)
+        htmlString += "<li class=\"list-group-item active\" id='card_" + i + "'>" + cardList[i]["name"] + "</li>";
+      else
+        htmlString += "<li class=\"list-group-item\" id='card_" + i + "'>" + cardList[i]["name"] + "</li>";
+    }
+    $("#card_list").empty();
+    $("#card_list").append(htmlString);
+    cardRender(cardList[0]);
+    for (let i in cardList) {
+      let cid = "#card_" + String(i);
+      (function(cid, i) {
+        $(cid).click(function(event) {
+          let name = cardList[i]["name"];
+          let des = cardList[i]["description"];
+          $('li').each(function(i, e) {
+            $(e).removeClass('active');
+          })
+          $(this).addClass("active");
+          cardRender(cardList[i]);
+        });
+      })(cid, i);
+    }
+  }
+  let getCardList = function() {
+    $.ajax({
+        url: '/card/selectCards',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          username: "admin",
+          password: "admin"
+        },
+        success: function(data) {
+          console.log(data);
+          if (data["errno"] == 0) {
+            cardList = data["data"];
+            cardList = cardList.reverse();
+            renderData(cardList);
+          } else {
+            alert(data["errmsg"]);
+          }
+        }
+      })
+      .fail(function() {
+        alert("获取卡牌数据失败!");
+      });
+  }
+
+  $(document).ready(function() {
+    getCardList()
+  });
+</script>
+
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style media="screen" type="text/css">
+    #Main {
+      margin: 2%;
+    }
+
+    #siderbar {
+      height: 600px;
+      overflow-y: auto;
+      min-height: 800px;
+      width: 250px;
+      font-size: 1.2em;
+    }
+
+    #show {
+      position: absolute;
+      right: 5%;
+      top: 5%;
+      height: 100%;
+      min-height: 800px;
+      width: 75%;
+      border: 1px solid #ccc;
+      font-size: 1.2em;
+    }
+
+    #card_background {
+      width: 500px;
+      height: 715px;
+    }
+
+    #show div {
+      border-bottom: 1px #CFA30D solid;
+    }
+
+    #cid {
+      width: 50%;
+    }
+
+    .del {
+      display: inline-block;
+      width: 140px;
+
+    }
+  </style>
+</head>
+
+<body>
+  <div id="Main" class="container">
+    <div class="row" id="siderbar">
+      <div style="padding:2%;width:100%;">
+        <ul class="list-group" id="card_list">
+        </ul>
+      </div>
+    </div>
+
+    <div class="row" id="show">
+
+      <div class="col-md-12" style="border:0px;">
+        <div class="row" style="border:0px;">
+          <div class="col-md-1" style="height:100%;border:0px;background:#34A9EB;border-right:1px solid #000;"><span style="left:0px">id</span></div>
+          <div id="cid" class="col-md-2" style="height:100%;border:0px;border-right:1px solid #000;">0</div>
+          <div style="border:0px;padding-left:40px"><span id="del_chapter" class="btn btn-link" style='margin-top:2px;padding:0px;height:23px;'>删除</span></div>
+        </div>
+        <div class="row">
+          <p class="bg-primary">name</p>
+          <div id="name">测试</div>
+          <p class="bg-primary">chapter</p>
+          <div id="level">0</div>
+          <p class="bg-primary">怪物</p>
+          <div id="ai">1</div>
+          <p class="bg-primary">首次通关卡牌奖励</p>
+          <div id="firstCardAward"></div>
+          <p class="bg-primary">一般通关卡牌奖励</p>
+          <div id="generalCardAward"></div>
+          <p class="bg-primary">通关获得经验</p>
+          <div id="expAward"></div>
+          <p class="bg-primary">首次通关金币奖励</p>
+          <div id="firstCoinAward"></div>
+          <p class="bg-primary">一般通关金币奖励</p>
+          <div id="generalCoinAward"></div>
+          <p class="bg-primary">对战开始剧情</p>
+          <div id="context_begin" style="font-size:0.8em;"></div>
+          <p class="bg-primary">对战结束剧情</p>
+          <div id="context_end" style="font-size:0.8em;border:0px"></div>
+        </div>
+        <h4><a href="http://www.bejson.com/" target="_blank">添加前访问这里来检查JSON格式 www.bejson.com</a></h4>
+        <div id="origin">
+          <pre id="origin_json">
+          </pre>
+        </div>
+        <div id="space" style="height:50px;width:100%;border:0px;"></div>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  var cardList;
+  let CardColor = {
+    "N": "#ddd",
+    "R": "#26d123",
+    "SR": "#7239de",
+    "UR": "#e38625",
+    "SSR": "#eb385e"
+  };
+  let cardRender = function(card) {
+    $("#cid").text(card["id"]);
+    $("#name").text(card["name"]);
+    if (card["name"].length >= 5) {
+      $("#name").css("font-size", "1.1em");
+    } else {
+      $("#name").css("font-size", "1.3em");
+    }
+    let name_left = 240;
+    let new_left = String(name_left - (card["name"].length - 2) * 5) + "px";
+    $("#name").css("left", new_left);
+
+    let ai = JSON.parse(card["ai"]);
+    let level = "第" + card["section"] + "章 第" + card["level"] + "关";
+    let context_begin = JSON.parse(card["context_begin"]);
+    let context_begin_string = "<p>";
+    for (let i in context_begin) {
+      if (context_begin[i]["pos"] == "bottom") {
+        for (let k in context_begin[i]["story"]) {
+          if (context_begin[i]["roles"][k]["left"] == undefined) {
+            context_begin_string += context_begin[i]["roles"][k]["right"] + " : " + context_begin[i]["story"][k];
+          } else
+          if (context_begin[i]["roles"][k]["right"] == undefined) {
+            context_begin_string += context_begin[i]["roles"][k]["left"] + " : " + context_begin[i]["story"][k];
+          } else {
+            context_begin_string += "None" + " : " + context_begin[i]["story"][k];
+          }
+          context_begin_string += "   (" + context_begin[i]["scene"][k] + ")<br />";
+        }
+      } else {
+        for (let k in context_begin[i]["story"]) {
+          context_begin_string += context_begin[i]["story"][k];
+          context_begin_string += "   (" + context_begin[i]["scene"][k] + ")<br />";
+        }
+      }
+    }
+    context_begin_string += "</p>";
+    let context_end = JSON.parse(card["context_end"]);
+    let context_end_string = "<p>";
+    for (let i in context_end) {
+      for (let k in context_end[i]["story"]) {
+        if (context_end[i]["roles"][k]["left"] == undefined) {
+          context_end_string += context_end[i]["roles"][k]["right"] + " : " + context_end[i]["story"][k];
+        } else
+        if (context_end[i]["roles"][k]["right"] == undefined) {
+          context_end_string += context_end[i]["roles"][k]["left"] + " : " + context_end[i]["story"][k];
+        } else {
+          context_end_string += "None" + " : " + context_end[i]["story"][k];
+        }
+        context_end_string += "   (" + context_end[i]["scene"][k] + ")<br />";
+      }
+
+    }
+    context_end_string += "</p>";
+    let firstCardAward = card["firstCardAward"];
+    let generalCardAward = card["generalCardAward"];
+    let firstCoinAward = card["firstCoinAward"];
+    let generalCoinAward = card["generalCoinAward"];
+    let expAward = card["expAward"];
+    let chapter_origin_json = JSON.stringify(card);
+    chapter_origin_json = chapter_origin_json.replace(/,/g, ",\n");
+    chapter_origin_json = chapter_origin_json.replace(/{"/g, "{\n\"");
+    chapter_origin_json = chapter_origin_json.replace(/"}/g, "\"\n}");
+    chapter_origin_json = chapter_origin_json.replace(/\\"/g, "\"");
+    $("#origin_json").html(chapter_origin_json);
+    $("#level").text(level);
+    $("#ai").text(ai);
+    $("#firstCardAward").text(firstCardAward);
+    $("#generalCardAward").text(generalCardAward);
+    $("#expAward").text(expAward);
+    $("#firstCoinAward").text(firstCoinAward);
+    $("#generalCoinAward").text(generalCoinAward);
+    $("#context_begin").html(context_begin_string);
+    $("#context_end").html(context_end_string);
+  }
+
+  let renderData = function(cardList) {
+    let htmlString = ""
+    for (let i in cardList) {
+      if (i == 0)
+        htmlString += "<li class=\"list-group-item active\" id='card_" + i + "'>" + cardList[i]["name"] +
+        "  ▶" + cardList[i]["section"] + ":" + cardList[i]["level"] + "◀" + "</li>";
+      else
+        htmlString += "<li class=\"list-group-item\" id='card_" + i + "'>" + cardList[i]["name"] + "▶" + cardList[i]["section"] + ":" + cardList[i]["level"] + "◀" + "</li>";
+    }
+    $("#card_list").empty();
+    $("#card_list").append(htmlString);
+    cardRender(cardList[0]);
+    for (let i in cardList) {
+      let cid = "#card_" + String(i);
+      (function(cid, i) {
+        $(cid).click(function(event) {
+          $('li').each(function(i, e) {
+            $(e).removeClass('active');
+          })
+          $(this).addClass("active");
+          cardRender(cardList[i]);
+        });
+      })(cid, i);
+    }
+  }
+  let delCard = function(id) {
+    $.ajax({
+        url: '/chapter/deleteChapter',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          id: id
+        },
+        success: function(data) {
+          console.log(data);
+          getCardList();
+        }
+      })
+      .fail(function() {
+        alert("删除数据失败!");
+      });
+  }
+  let getCardList = function() {
+    $.ajax({
+        url: '/chapter/selectChapters',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          username: "admin",
+          password: "admin"
+        },
+        success: function(data) {
+          console.log(data);
+          if (data["errno"] == 0) {
+            cardList = data["data"];
+            cardList.sort((a, b) => {
+              return a["section"] * 10 + a["level"] - (b["section"] * 10 + b["level"]);
+            })
+            renderData(cardList);
+          } else {
+            alert(data["errmsg"]);
+          }
+        }
+      })
+      .fail(function() {
+        alert("获取卡牌数据失败!");
+      });
+  }
+  $("#del_chapter").click(function() {
+    if (prompt("是否要删除")) {
+      delCard(parseInt($("#cid").text()));
+    }
+
+  });
+  $(document).ready(function() {
+    getCardList()
+  });
+</script>
+
+</html>

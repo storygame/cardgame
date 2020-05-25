@@ -1,0 +1,15 @@
+{
+  "apps": [{
+    "name": "cards_game",
+    "script": "production.js",
+    "cwd": "/var/www/cards_game",
+    "exec_mode": "fork",
+    "max_memory_restart": "1G",
+    "autorestart": true,
+    "node_args": [],
+    "args": [],
+    "env": {
+
+    }
+  }]
+}

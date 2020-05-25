@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style media="screen">
+    #Main{
+      margin-top:2%;
+      margin-bottom:2%;
+    }
+    .hide_area{
+      display:none;
+      height:0px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="Main" class="container">
+    <div class="row" style="border-bottom:3px solid rgb(54, 205, 178);margin-bottom:10px;">
+      <h1>卡牌添加</h1>
+    </div>
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <form>
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="name" placeholder="Name">
+          </div>
+          <div class="form-group">
+            <label for="description">Description</label>
+            <input type="text" class="form-control" id="description" placeholder="使对手增加3点萌化值,...">
+          </div>
+          <div class="form-group">
+            <label for="img_link">Img Link</label>
+            <input type="text" class="form-control" id="img_link" placeholder="https://....">
+          </div>
+          <div class="open_hide_area col-md-2 col-md-offset-10" style="text-center:right;margin-left:100%;height:20px;">
+            <button class="btn btn-sm btn-info" id="show" type="button">显示</button>
+          </div>
+          <div class="hide_area" id="hide_area">
+            <div class="form-group">
+              <label for="img_bak_link">Img Bak Link</label>
+              <input type="text" class="form-control" id="img_bak_link" placeholder="https://....">
+            </div>
+            <div class="form-group">
+              <label for="animation_link">Animation Link</label>
+              <input type="text" class="form-control" id="animation_link" placeholder="https://....">
+            </div>
+            <div class="form-group">
+              <label for="sound_link">Sound Link</label>
+              <input type="text" class="form-control" id="sound_link" placeholder="https://....">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="type">Card Type</label>
+            <input type="text" class="form-control" id="type" placeholder="魔法" value="魔法">
+          </div>
+          <div class="form-group">
+            <label for="state">Card State</label>
+            <input type="text" class="form-control" id="state" placeholder="enable" value="enable">
+          </div>
+          <div class="form-group">
+            <label for="story">Story</label>
+            <input type="text" class="form-control" id="story" placeholder="每一张卡牌都有自己的故事.">
+          </div>
+          <div class="form-group">
+            <h4><a href="http://www.bejson.com/" target="_blank">添加前访问这里来检查JSON格式 www.bejson.com</a></h4>
+          </div>
+          <div class="form-group">
+            <label for="effect">Card Effect</label>
+            <textarea type="text" class="form-control" id="effect" rows=15 value="" style="font-size:1.2em;"></textarea>
+          </div>
+
+
+
+          <div class="col-md-4 col-md-offset-5">
+            <button type="button" id="add_card" class="btn btn-lg btn-success">添加卡牌</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    //设置初始默认值
+    let card_effect_string =
+      '{"pointer":2,"damage":2,"cards":0,"star":0,"protect":0,"extra_turn":0,"condition":{"pointer":0,"cute_value":0,"cute_value_operand":"=","cards_value":0,"cards_value_operand":">","star_value":0,"star_value_operand":"<","protect_value":0,"protect_value_operand":"=","damage":0,"damage_operand":">","cards":0,"cards_operand":"<","star":0,"star_operand":"<","protect":0,"protect_operand":"<","condition_time":1,"secret":true},"other_card_effect":{"pointer":2,"damage":2,"cards":0,"star":0,"protect":0,"extra_turn":0},"source":0,"card_cost":1,"card_rare":"N"}';
+    card_effect_string = card_effect_string.replace(/,/g, ",\n");
+    card_effect_string = card_effect_string.replace(/{"/g, "{\n\"");
+    card_effect_string = card_effect_string.replace(/"}/g, "\"\n}");
+    $("#effect").val(card_effect_string);
+    $("#show").click(function(event) {
+      if ($(this).text() == "显示") {
+
+        $("#hide_area").css("display", "block");
+
+        $("#hide_area").animate({
+          "height": "280px"
+        }, 500);
+        $(this).text("隐藏")
+      } else {
+        $("#hide_area").animate({
+          "height": "0px"
+        }, 500);
+        setTimeout(function() {
+          $("#hide_area").css("display", "none");
+        }, 500);
+        $(this).text("显示");
+      }
+    });
+
+    $("#add_card").click(function(event) {
+      /* Act on the event */
+      let name = $("#name").val();
+      let description = $("#description").val();
+      let img_link = $("#img_link").val();
+      let img_bak_link = $("#img_bak_link").val();
+      let animation_link = $("#animation_link").val();
+      let sound_link = $("#sound_link").val();
+      let type = $("#type").val();
+      let state = $("#state").val();
+      let effect = $("#effect").val();
+      let story = $("#story").val();
+      $.ajax({
+          url: '/card/addCard',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            name: name,
+            description: description,
+            img: img_link,
+            img_bak: img_bak_link,
+            animation: animation_link,
+            sound: sound_link,
+            type: type,
+            state: state,
+            effect: effect,
+            story: story
+          },
+          success: function(data) {
+            alert("添加成功");
+          }
+        })
+        .fail(function() {
+          alert("失败!")
+        });
+
+    });
+  });
+</script>
+
+</html>

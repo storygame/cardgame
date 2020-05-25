@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style media="screen">
+    #Main{
+      margin-top:2%;
+      margin-bottom:2%;
+    }
+    .hide_area{
+      display:none;
+      height:0px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="Main" class="container">
+    <div class="row" style="border-bottom:3px solid rgb(54, 205, 178);margin-bottom:10px;">
+      <h1>怪物添加</h1>
+    </div>
+    <div class="row">
+      <div class="col-md-8 col-md-offset-2">
+        <form>
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="name" placeholder="Name">
+          </div>
+          <div class="form-group">
+            <label for="description">Skill_Description</label>
+            <input type="text" class="form-control" id="description" placeholder='["顺劈:每回合对敌方造成1点伤害.", "防御:每回合增加1点护甲."]' value='["顺劈:每回合对敌方造成1点伤害."]'>
+          </div>
+          <div class="form-group">
+            <label for="img_link">Img Link</label>
+            <input type="text" class="form-control" id="img_link" placeholder="https://....">
+          </div>
+
+          <div class="form-group">
+            <label for="type">Monster Type</label>
+            <input type="text" class="form-control" id="type" placeholder="兵,士,相,王" value="兵">
+          </div>
+          <div class="form-group">
+            <h4><a href="http://www.bejson.com/" target="_blank">添加前访问这里来检查JSON格式 www.bejson.com</a></h4>
+          </div>
+          <div class="form-group">
+            <label for="skill">Skill skill</label>
+            <textarea type="text" class="form-control" id="skill" rows=15 value="" style="font-size:1.2em;"></textarea>
+          </div>
+
+
+
+          <div class="col-md-4 col-md-offset-5">
+            <button type="button" id="add_card" class="btn btn-lg btn-success">添加怪物</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+    //设置初始默认值
+    let card_skill_string =
+      '{"pointer":2,"damage":2,"cards":0,"star":0,"protect":0,"extra_turn":0,"buff_turn":999,"settlement":2,"other_card_effect":{"pointer":1,"protect":2,"cards":0,"star":0,"damage":0,"extra_turn":0,"buff_turn":999,"settlement":2},"card_cost":0,"card_rare":"N"}';
+    card_skill_string = card_skill_string.replace(/,/g, ",\n");
+    card_skill_string = card_skill_string.replace(/{"/g, "{\n\"");
+    card_skill_string = card_skill_string.replace(/"}/g, "\"\n}");
+    $("#skill").val(card_skill_string);
+
+    $("#add_card").click(function(event) {
+      /* Act on the event */
+      let name = $("#name").val();
+      let description = $("#description").val();
+      let img_link = $("#img_link").val();
+      let type = $("#type").val();
+      let skill = $("#skill").val();
+
+      $.ajax({
+          url: '/monster/addMonster',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            "name": name,
+            "skill_description": description,
+            "img": img_link,
+            "type": type,
+            "skill": skill,
+          },
+          success: function(data) {
+            alert("添加成功");
+          }
+        })
+        .fail(function() {
+          alert("失败!")
+        });
+
+    });
+  });
+</script>
+
+</html>

@@ -1,0 +1,185 @@
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style media="screen" type="text/css">
+    #Main {
+      margin-top: 2%;
+      margin-bottom: 2%;
+    }
+
+    .hide_area {
+      display: none;
+      height: 0px;
+    }
+
+    #siderbar {
+      height: 400px;
+      overflow-y: auto;
+      min-height: 800px;
+      width: 200px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="Main" class="container">
+    <div class="row">
+      <div id="siderbar" class="col-md-2">
+        <div style="padding:2%;width:100%;">
+          <ul class="list-group" id="monster_list">
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-8 ">
+        <form>
+          <div class="form-group">
+            <label for="id">ID</label>
+            <input type="text" class="form-control" id="id" placeholder="10000">
+          </div>
+          <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" class="form-control" id="name" placeholder="Name">
+          </div>
+          <div class="form-group">
+            <label for="description">Skill_Description</label>
+            <input type="text" class="form-control" id="description" placeholder='["顺劈:每回合对敌方造成1点伤害.", "防御:每回合增加1点护甲."]' value='["顺劈:每回合对敌方造成1点伤害."]'>
+          </div>
+          <div class="form-group">
+            <label for="img_link">Img Link</label>
+            <input type="text" class="form-control" id="img_link" placeholder="https://....">
+          </div>
+
+          <div class="form-group">
+            <label for="type">Monster Type</label>
+            <input type="text" class="form-control" id="type" placeholder="兵,士,相,王" value="兵">
+          </div>
+          <div class="form-group">
+            <h4><a href="http://www.bejson.com/" target="_blank">修改前访问这里来检查JSON格式 www.bejson.com</a></h4>
+          </div>
+          <div class="form-group">
+            <label for="skill">Skill skill</label>
+            <textarea type="text" class="form-control" id="skill" rows=15 value="" style="font-size:1.2em;"></textarea>
+          </div>
+
+
+
+          <div class="col-md-4 col-md-offset-5">
+            <button type="button" id="add_monster" class="btn btn-lg btn-success">修改怪物</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  $(document).ready(function() {
+
+
+    $("#add_monster").click(function(event) {
+      /* Act on the event */
+      let id = $("#id").val();
+      let name = $("#name").val();
+      let description = $("#description").val();
+      let img_link = $("#img_link").val();
+      let type = $("#type").val();
+      let skill = $("#skill").val();
+
+      $.ajax({
+          url: '/monster/editMonster',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            "id": id,
+            "name": name,
+            "skill_description": description,
+            "img": img_link,
+            "type": type,
+            "skill": skill,
+          },
+          success: function(data) {
+            alert("修改成功");
+          }
+        })
+        .fail(function() {
+          alert("失败!")
+        });
+    });
+    let monsterRender = function(monster) {
+      $("#id").val(monster["id"]);
+      $("#name").val(monster["name"]);
+      $("#description").val(monster["skill_description"]);
+      $("#img_link").val(monster["img"]);
+      $("#type").val(monster["type"]);
+      let monster_effect_string = monster["skill"];
+      monster_effect_string = monster_effect_string.replace(/,/g, ",\n");
+      monster_effect_string = monster_effect_string.replace(/{"/g, "{\n\"");
+      monster_effect_string = monster_effect_string.replace(/"}/g, "\"\n}");
+      $("#skill").val(monster_effect_string);
+    }
+    let renderData = function(monsterList) {
+      let htmlString = ""
+      for (let i in monsterList) {
+        if (i == 0)
+          htmlString += "<li class=\"list-group-item active\" id='monster_" + i + "'>" + monsterList[i]["name"] + "</li>";
+        else
+          htmlString += "<li class=\"list-group-item\" id='monster_" + i + "'>" + monsterList[i]["name"] + "</li>";
+      }
+      $("#monster_list").empty();
+      $("#monster_list").append(htmlString);
+      monsterRender(monsterList[0]);
+      for (let i in monsterList) {
+        let cid = "#monster_" + String(i);
+        (function(cid, i) {
+          $(cid).click(function(event) {
+            let name = monsterList[i]["name"];
+            let des = monsterList[i]["skill_description"];
+            $('li').each(function(i, e) {
+              $(e).removeClass('active');
+            })
+            $(this).addClass("active");
+            monsterRender(monsterList[i]);
+          });
+        })(cid, i);
+      }
+    }
+    let getMonsterList = function() {
+      $.ajax({
+          url: '/monster/selectMonsters',
+          type: 'POST',
+          dataType: 'json',
+          data: {
+            username: "admin",
+            password: "admin"
+          },
+          success: function(data) {
+            console.log(data);
+            if (data["errno"] == 0) {
+              monsterList = data["data"];
+              monsterList = monsterList.reverse();
+              renderData(monsterList);
+            } else {
+              alert(data["errmsg"]);
+            }
+          }
+        })
+        .fail(function() {
+          alert("获取卡牌数据失败!");
+        });
+    }
+    let init = function() {
+      getMonsterList();
+    }
+    init();
+  });
+</script>
+
+</html>

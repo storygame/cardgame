@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.15/css/jquery.dataTables.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <style media="screen" type="text/css">
+  </style>
+</head>
+
+<body>
+  <div id="Main" class="container">
+    <div class="row">
+      <div class="col-md-8 form-group">
+        <label for="code">secure-code</label>
+        <input type="text" class="form-control" id="code" placeholder="没有code请找@RT">
+      </div>
+      <div class="col-md-4">
+        <button style="margin-top:23px;" class="btn btn-danger" id="getData" type="button">获取用户数据</button>
+      </div>
+    </div>
+    <table id="userData" class="display">
+      <tbody>
+        <thead>
+          <tr>
+            <th width="5%">id</th>
+            <th width="5%">username</th>
+            <th width="5%">微信名</th>
+            <th width="5%">openid</th>
+            <th width="15%">头像</th>
+            <th width="5%">玉石</th>
+            <th width="5%">经验</th>
+            <th width="10%">登录ip</th>
+            <th width="10%">登录时间</th>
+            <th width="15%">签到信息</th>
+            <th width="10%">关卡进度</th>
+            <th width="10%">临时牌库</th>
+          </tr>
+        </thead>
+      </tbody>
+    </table>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" charset="utf8" src="http://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+<script src="https://underscorejs.org/underscore-min.js"></script>
+<script>
+  const PageSize = 10;
+  let UserCount = 0;
+  const renderUserData = userData => {
+    const option = {
+      'data': userData,
+      "columnDefs": [{
+          "name": "玩家id",
+          "targets": 0,
+          "data": 'id',
+          "searchable": true,
+          "defaultContent": "0",
+        },
+        {
+          "name": "username",
+          "targets": 1,
+          "data": 'username',
+          "searchable": true,
+          "defaultContent": "无",
+        },
+        {
+          "name": "微信名",
+          "targets": 2,
+          "data": 'nickname',
+          "searchable": true,
+          "defaultContent": "无",
+        },
+        {
+          "name": "openid",
+          "targets": 3,
+          "data": 'weixin_openid',
+          "searchable": false,
+          "defaultContent": "无",
+        },
+        {
+          "name": "头像",
+          "targets": 4,
+          "data": 'avatar',
+          "searchable": false,
+          "defaultContent": "无",
+          "render": function(data, type, row, meta) {
+            if (data.length > 0) {
+              return "<img src=" + data + " alt='loading' />";
+            } else {
+              return "无头像";
+            }
+          },
+        },
+        {
+          "name": "玉石",
+          "targets": 5,
+          "data": 'coins',
+          "searchable": false,
+          "defaultContent": "无",
+        },
+        {
+          "name": "经验",
+          "targets": 6,
+          "data": 'exp',
+          "searchable": false,
+          "defaultContent": "无",
+        }, {
+          "name": "ip",
+          "targets": 7,
+          "data": 'last_login_ip',
+          "searchable": true,
+          "defaultContent": "仅限微信登录",
+        }, {
+          "name": "上次登录时间",
+          "targets": 8,
+          "data": 'last_login_time',
+          "searchable": false,
+          "defaultContent": "仅限微信登录",
+        }, {
+          "name": "签到",
+          "targets": 9,
+          "data": 'checkin',
+          "searchable": false,
+          "defaultContent": "无",
+          "render": function(data, type, row, meta) {
+            let datajson = {};
+            try {
+              datajson = JSON.parse(data);
+              return "上次签到时间:<br />" + formatTime(datajson['last_time']) + "<br />签到总次数:  " + datajson['times'];
+            } catch (e) {
+              if (data.length == 0) {
+                return "无信息";
+              }
+              return "签到json解析错误";
+            }
+          },
+        },
+        {
+          "name": "关卡进度",
+          "targets": 10,
+          "data": 'single_level',
+          "searchable": false,
+          "defaultContent": "0:0",
+          'render': function(data, type, row, meat) {
+            return "总进度: " + row['single_level'] + "     ;<br />临时进度: " + row['tmp_level'];
+          }
+        },
+        {
+          "name": "tmp_collection",
+          "targets": 11,
+          "data": 'tmp_collection',
+          "searchable": false,
+          "defaultContent": "无",
+          'render': function(data, type, row, meat) {
+            let cards = [];
+            try {
+              cards = JSON.parse(data);
+              let s = "";
+              for (let i of cards) {
+                s += i + "<br />";
+              }
+              return s;
+
+            } catch (e) {
+              cards = [];
+              return "牌库数据错误"
+            }
+          }
+        },
+      ]
+    }
+    $('#userData').DataTable(option);
+  }
+  const getUserList = function(code, pageNo, pageSize) {
+    $.ajax({
+      url: '/auth/data/selectUserCount',
+      type: 'POST',
+      dataType: 'json',
+      data: {
+        code: code
+      },
+      success: function(data) {
+        if (data['errno'] == 0) {
+          UserCount = data['data'];
+        }
+      }
+    }).fail(() => {
+      alert('玩家数量获取失败!');
+    })
+    $.ajax({
+        url: '/auth/data/selectAllUsers',
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          code: code,
+          pageNo: pageNo,
+          pageSize: pageSize,
+        },
+        success: function(data) {
+          console.log(data);
+          if (data["errno"] == 0) {
+            userData = data["data"];
+            userData = userData.reverse();
+            renderUserData(userData);
+          } else {
+            alert(data["errmsg"]);
+          }
+        }
+      })
+      .fail(function() {
+        alert("获取玩家数据失败!");
+      });
+  }
+  $(document).ready(function() {
+    $("#getData").click((e) => {
+      let code = $("#code").val();
+      getUserList(code, 1, PageSize);
+    })
+  });
+
+  function zero(s) {
+    if (String(s).length == 1) {
+      return "0" + s;
+    }
+    return s;
+  }
+
+  function formatTime(sj) {
+    var now = new Date(sj);
+    var year = now.getFullYear();
+    var month = now.getMonth() + 1;
+    var date = now.getDate();
+    var hour = now.getHours();
+    var minute = now.getMinutes();
+    var second = now.getSeconds();
+    return year + "-" + zero(month) + "-" + zero(date) + " " + zero(hour) + ":" + zero(minute) + ":" + zero(second);
+
+  }
+</script>
+
+</html>

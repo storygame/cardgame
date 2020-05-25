@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ch" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+</head>
+
+<body>
+  <div id="Main" class="container">
+    <div class="row" id="siderbar">
+      <div style="padding:2%;width:100%;">
+        <ul class="list-group" id="url_list">
+        </ul>
+      </div>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript">
+  var urlJsonList = [{
+      "name": "玩家信息",
+      "url": "/index/user"
+    },
+    {
+      "name": "添加卡牌",
+      "url": "/index/cardsAdd"
+    }, {
+      "name": "查看卡牌",
+      "url": "/index/cards"
+    }, {
+      "name": "更改卡牌",
+      "url": "/index/change"
+    }, {
+      "name": "添加怪物",
+      "url": "/index/monsterAdd"
+    }, {
+      "name": "查看怪物",
+      "url": "/index/monsters"
+    }, {
+      "name": "更改怪物",
+      "url": "/index/monsterUpdate"
+    }, {
+      "name": "添加剧情",
+      "url": "/index/chapterAdd"
+    }, {
+      "name": "查看剧情",
+      "url": "/index/chapter"
+    }, {
+      "name": "测试剧情结构",
+      "url": "/index/test"
+    }, {
+      "name": "查看资源",
+      "url": "/index/resource"
+    }, {
+      "name": "添加资源",
+      "url": "/index/resourceAdd"
+    },
+    {
+      "name": "查看公告",
+      "url": "/index/mails"
+    },
+    {
+      "name": "添加公告",
+      "url": "/index/officialMail"
+    }, {
+      "name": "测试UI",
+      "url": "/index/interface"
+    },
+  ];
+  $(document).ready(function() {
+    let urlHtml = "";
+    for (let i in urlJsonList) {
+      urlHtml += "<li class=\"list-group-item\" id='url_" + i + "'><a href='" + urlJsonList[i]["url"] + "'>" + urlJsonList[i]["name"] + "</a></li>";
+    }
+    $("#url_list").append(urlHtml);
+
+  });
+</script>
+
+</html>

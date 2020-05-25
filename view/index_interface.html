@@ -1,0 +1,112 @@
+<html lang="ch">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Document</title>
+  <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link href="/static/css/interface.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="main container">
+    <div class="header">
+
+      <div class="avator img-circle">
+        <img class="avator_img " src="/static/image/avator9.png" alt="">
+      </div>
+      <div class="exp">
+        <span id="exp_level">Lv. 12</span>
+        <span id="name">圣洁之际议员</span>
+        <div class="exp_progress_div">
+          <div id="exp_progress" class="progress-bar progress-bar-warning progress-bar-striped" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">
+          </div>
+        </div>
+
+      </div>
+
+      <div class="mail">
+        <img class="mail_img" src="/static/image/mail.png" />
+      </div>
+      <div class="coin">
+        <img class="coin_img" src="/static/image/coin.png" />
+        <div id="coin_num_div">
+          <span id="coin_num">444</span>
+        </div>
+      </div>
+      <div class="setting">
+        <img class="setting_img" src="/static/image/setting.png" />
+      </div>
+
+
+    </div>
+    <div class="content">
+
+
+    </div>
+    <div class="footer">
+
+      <div class="col-md-4 chat-box">
+        <div class="chat-message">
+          [系统] 点击这里发送消息。
+        </div>
+      </div>
+
+    </div>
+
+
+
+    <div class="chat-pannel">
+      <div class="chat-channel">
+
+      </div>
+    </div>
+
+    <div class="award">
+      <table class="award_info">
+        <tr>
+          <td class="info">EXP</td>
+          <td class="space"></td>
+          <td class="exp_num">+2888</td>
+        </tr>
+        <tr>
+          <td class="info">COIN</td>
+
+          <td class="space"></td>
+          <td class="coins">+30</td>
+        </tr>
+      </table>
+      <!-- <div class="exp_award">
+        <span id="info">EXP</span>
+        <span id="exp"> + 2888</span>
+      </div>
+      <div class="coin_award">
+        <span id="info">COIN</span>
+        <span id="coin"> + 30</span>
+      </div> -->
+    </div>
+  </div>
+</body>
+<script src="/static/js/jquery.min.js"></script>
+<script type="text/javascript">
+  var ChatPannelShow = false;
+  $(".award").hide();
+  $(document).ready(function() {
+    $(".chat-box").click(function(e) {
+      $(".chat-pannel").show();
+      $(".chat-box").hide();
+      setTimeout(function() {
+        ChatPannelShow = true;
+      }, 1000);
+    });
+    $(".main").click(function(e) {
+      if (ChatPannelShow) {
+        $(".chat-pannel").hide();
+        $(".chat-box").show();
+        ChatPannelShow = false;
+      }
+    });
+  });
+</script>
+
+</html>

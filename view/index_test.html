@@ -1,0 +1,170 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Document</title>
+  <link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+  <style type="text/css">
+    * {
+      margin: 0px;
+      padding: 0px;
+    }
+
+    html,
+    body {
+      font-size: 19px;
+      font-family: 'Verdana', 'Arial';
+      color: rgba(0, 0, 0, 0.8);
+      width: 100%;
+      height: 100%;
+    }
+
+    .main {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      /* background: url('https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1545849629719&di=adcb7c139626b2aa563355c915e0ebdb&imgtype=0&src=http%3A%2F%2Fpic.paopaoche.net%2Fup%2F2014-9%2F14117888944440610.jpg') center top; */
+      /* background: radial-gradient(circle at 29.65% 43.21%, #000000, transparent 100%), radial-gradient(circle at 50% 50%, #424242, #424242 100%); */
+      /* background: url("/static/image/backg.jpg"); */
+      background-size: cover;
+    }
+
+    .content {
+      width: 1136px;
+      height: 400px;
+      position: absolute;
+      top: 70%;
+      left: 40%;
+      overflow: hidden;
+      margin-top: -200px;
+      margin-left: -400px;
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+      z-index: 100;
+      padding: 50px;
+      box-sizing: border-box;
+      /*不会把盒子撑开*/
+    }
+
+    .content::before {
+      content: "";
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      z-index: -1;
+      /*-1 可以当背景*/
+      -webkit-filter: blur(20px);
+      filter: blur(20px);
+      margin: -30px;
+      /*消除边缘透明*/
+
+      /* background: url('https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1545849629719&di=adcb7c139626b2aa563355c915e0ebdb&imgtype=0&src=http%3A%2F%2Fpic.paopaoche.net%2Fup%2F2014-9%2F14117888944440610.jpg') center top; */
+      /* background: radial-gradient(circle at 44.01% 19.06%, #513581, transparent 84%), radial-gradient(circle at 74.01% 51.04%, #839050, transparent 56%), radial-gradient(circle at 10.98% 30.94%, #9d1d06, transparent 44%), radial-gradient(circle at 7.04% 51.04%, #7bb9a6, transparent 89%), radial-gradient(circle at 50% 50%, #6648b5, #6648b5 100%); */
+
+      background-size: cover;
+      /*平铺*/
+      background-attachment: fixed;
+      /*位置固定*/
+    }
+
+    .content h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .content p {
+      line-height: 1.7;
+      /*1.7倍行间距*/
+    }
+
+    .text-header {
+      color: #ddd;
+    }
+
+    .footer {
+      display: none;
+      position: absolute;
+      bottom: 90%;
+
+      height: 90px;
+      width: 100%;
+      padding-left: 40%;
+    }
+
+    input {
+      width: 200px;
+      height: 55px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="main">
+    <!-- <div class="space" style="margin:100px;width:500px;height:281.69px;background-color: #3C3E3E;filter: opacity(90%);">
+
+    </div> -->
+    <!-- <div class="content">
+      <h1 class="text-header"></h1>
+      <p></p>
+    </div> -->
+    <div class="footer">
+      <input placeholder="请设置背景颜色或图片链接" type="text" name="" value="" id="color_picker" />
+    </div>
+    <div style="width:100%;height:200px;margin-left:25px;margin-top:25px;">
+      <h1>剧情格式检查</h1>
+      <textarea id="test_text" style="width:1000px;height:500px;">
+
+      </textarea>
+      <br />
+      <button type="button" id="test" class="btn btn-default" name="button">测试</button>
+    </div>
+  </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.0.0-rc1/jquery.js"></script>
+<script type="text/javascript">
+  function assert(c, s) {
+    if (arguments.length == 1) {
+      s = "ASSERT ERROR";
+    }
+    if (!c) {
+      throw ("Error:" + s);
+    }
+    return;
+  }
+  $(document).ready(function() {
+    $("#color_picker").change(function(e) {
+      let col = $("#color_picker").val();
+      $(".main").css("background", col);
+    })
+    $("#test").click(function(event) {
+      let s = $("#test_text").val();
+      let data = JSON.parse(s);
+      console.log(data);
+      for (let i in data) {
+        if (data[i]["context_begin"] != undefined) {
+          assert(data[i]["context_begin"]["pos"] != "middle" && data[i]["context_begin"]["pos"] != "bottom", "wrong pos in " + i);
+          for (let k in data[i]["context_begin"]) {
+            console.log("check length:", data[i]["context_begin"][k]["story"].length, data[i]["context_begin"][k]["roles"].length, data[i]["context_begin"][k]["scene"].length);
+            assert(data[i]["context_begin"][k]["story"].length == data[i]["context_begin"][k]["roles"].length, "wrong length in " + i);
+          }
+        } else {
+          console.log("no context_begin.");
+        }
+        if (data[i]["context_end"] != undefined) {
+          for (let k in data[i]["context_end"]) {
+            console.log("check length:", data[i]["context_end"][k]["story"].length, data[i]["context_end"][k]["roles"].length, data[i]["context_end"][k]["scene"].length);
+            assert(data[i]["context_end"][k]["story"].length == data[i]["context_end"][k]["roles"].length, "wrong end length in " + i);
+          }
+
+        } else {
+          console.log("no context_end.");
+        }
+      }
+      console.log("Check Finished!")
+    });
+  });
+</script>
+
+</html>
